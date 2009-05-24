@@ -10,7 +10,7 @@ import com.google.io.kmeans.Clusterer.Point;
  * Class that demonstrates how to integrate Dalvik with browser JavaScript.
  */
 public class KMeansWebViewActivity extends Activity {
-	private static final String URI = "http://31337.appspot.com/sdk/index2.html";
+	private static final String URI = "http://hdict-io09.appspot.com/index2.html";
 	private WebView webView;
 
 	/**
