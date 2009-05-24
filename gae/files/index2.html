@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<html>
+<body>
+    <canvas id="kmeans" width="320" height="430"></canvas>
+    <div id="times" width="320" height="50"></div>
+    <script language="JavaScript">
+    var COLORS = new Array("rgb(255,0,0)", "rgb(255,69,0)", "rgb(255,255,0)", "rgb(0,255,0)", "rgb(0,0,255)", "rgb(255,0,255)");
+    var rq = new XMLHttpRequest();
+    rq.onreadystatechange=function() {
+      if (rq.readyState==4) {
+        var points = eval(rq.responseText);
+        var xs = new Array();
+        var ys = new Array();
+
+        var evStart = (new Date()).getTime();
+        for (var i = 0; i < points.length; ++i) {
+          xs[i] = points[i].x;
+          ys[i] = points[i].y;
+        }
+        var res = CLUSTER.cluster(xs.join(), ys.join());
+        var resAry = ("" + res).split(',');
+        var clusterDuration = (new Date()).getTime() - evStart;
+
+        var canvas = document.getElementById('kmeans');
+        var ctx = canvas.getContext('2d');
+
+        var start = (new Date()).getTime();
+        ctx.fillStyle = 'rgb(0, 0, 0)';
+        ctx.fillRect(0, 0, 320, 430);
+        ctx.fillStyle = 'rgb(255, 0, 0)';
+        for (var i = 0; i < points.length; ++i) {
+          ctx.fillStyle = COLORS[parseInt(resAry[i])];
+          ctx.fillRect(points[i].x, points[i].y, 1, 1);
+        }
+        var duration = (new Date()).getTime() - start;
+
+        var div = document.getElementById('times');
+        div.appendChild(document.createTextNode('' + clusterDuration + " " + duration));
+      }
+    }
+    rq.open("GET", "points.json", false);
+    rq.send(null);
+    </script>
+</body>
+</html>
