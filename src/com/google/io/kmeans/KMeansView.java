@@ -19,8 +19,8 @@ public class KMeansView extends SurfaceView implements Callback {
 		SurfaceHolder holder = getHolder();
 		holder.addCallback(this);
 		// use either the Dalvik version, or the native version; don't uncomment both
-		//thread = new KMeansThread(holder, new DalvikClusterer());
-		thread = new KMeansThread(holder, new NativeClusterer());
+		thread = new KMeansThread(holder, new DalvikClusterer());
+		//thread = new KMeansThread(holder, new NativeClusterer());
 	}
 
 	public void surfaceChanged(SurfaceHolder holder, int format, int width,

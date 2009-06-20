@@ -5,6 +5,7 @@ import java.util.Random;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.util.Log;
 import android.view.SurfaceHolder;
 
 import com.google.io.kmeans.Clusterer.Point;
@@ -66,6 +67,7 @@ public final class KMeansThread extends Thread {
 			long duration = System.currentTimeMillis() - start;
 			canvas.drawText("" + duration, 10, 10, paint);
 			canvas.drawText("" + clusterDuration, 10, 50, paint);
+			Log.d("Cluster time", "" + clusterDuration);
 		} finally {
 			holder.unlockCanvasAndPost(canvas);
 		}

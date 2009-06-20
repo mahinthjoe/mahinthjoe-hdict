@@ -1,6 +1,5 @@
 package com.google.io.kmeans;
 
-import java.util.HashMap;
 import java.util.Random;
 
 /**
