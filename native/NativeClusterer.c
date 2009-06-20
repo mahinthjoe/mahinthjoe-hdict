@@ -23,6 +23,7 @@ jobjectArray points, jint numClusters, jint width, jint height) {
     int loopCount = 0;
     jsize numPoints = (*env)->GetArrayLength(env, points);
     double distances[numPoints];
+    point pointsAry[numPoints];
     point means[numClusters];
     int sumX[numClusters];
     int sumY[numClusters];
@@ -41,6 +42,16 @@ jobjectArray points, jint numClusters, jint width, jint height) {
     yFID = (*env)->GetFieldID(env, pointClass, "y", "I");
     clusterFID = (*env)->GetFieldID(env, pointClass, "cluster", "I");
 
+    // copy the xs & ys into a flat array, so that we don't make so many JNI calls
+    for (i = 0; i < numPoints; ++i) {
+        point = (*env)->GetObjectArrayElement(env, points, i);
+        pointsAry[i].x = (*env)->GetIntField(env, point, xFID);
+        pointsAry[i].y = (*env)->GetIntField(env, point, yFID);
+        pointsAry[i].cluster = (*env)->GetIntField(env, point, clusterFID);
+        (*env)->DeleteLocalRef(env, point);
+    }
+
+
     // initialize the means
     for (i = 0; i < numClusters; ++i) {
         means[i].x = rand() % width;
@@ -57,18 +68,14 @@ jobjectArray points, jint numClusters, jint width, jint height) {
     while (!converged) {
         dirty = 0;
         for (i = 0; i < numPoints; ++i) {
-            point = (*env)->GetObjectArrayElement(env, points, i);
             for (j = 0; j < numClusters; ++j) {
-                ptX = (*env)->GetIntField(env, point, xFID);
-                ptY = (*env)->GetIntField(env, point, yFID);
-                distance = computeDistance(ptX, ptY, means[j].x, means[j].y);
+                distance = computeDistance(pointsAry[i].x, pointsAry[i].y, means[j].x, means[j].y);
                 if (distance < distances[i]) {
                     dirty = 1;
                     distances[i] = distance;
-                    (*env)->SetIntField(env, point, clusterFID, j);
+                    pointsAry[i].cluster = j;
                 }
             }
-            (*env)->DeleteLocalRef(env, point);
         }
         if (!dirty) {
             converged = 1;
@@ -79,12 +86,10 @@ jobjectArray points, jint numClusters, jint width, jint height) {
             sumX[i] = sumY[i] = clusterSizes[i] = 0;
         }
         for (i = 0; i < numPoints; ++i) {
-            point = (*env)->GetObjectArrayElement(env, points, i);
-            cluster = (*env)->GetIntField(env, point, clusterFID);
-            sumX[cluster] += (*env)->GetIntField(env, point, xFID);
-            sumY[cluster] += (*env)->GetIntField(env, point, yFID);
+            cluster = pointsAry[i].cluster;
+            sumX[cluster] += pointsAry[i].x;
+            sumY[cluster] += pointsAry[i].y;
             clusterSizes[cluster] += 1;
-            (*env)->DeleteLocalRef(env, point);
         }
         for (i = 0; i < numClusters; ++i) {
             means[i].x = sumX[i] / clusterSizes[i];
@@ -93,6 +98,14 @@ jobjectArray points, jint numClusters, jint width, jint height) {
         loopCount++;
         converged = converged ? 1 : loopCount > MAX_LOOP_COUNT;
     }
+
+    // copy the final cluster assignments back into the input objects
+    for (i = 0; i < numPoints; ++i) {
+        point = (*env)->GetObjectArrayElement(env, points, i);
+        (*env)->SetIntField(env, point, clusterFID, pointsAry[i].cluster);
+        (*env)->DeleteLocalRef(env, point);
+    }
+
     (*env)->DeleteLocalRef(env, pointClass);
     return;
 }
