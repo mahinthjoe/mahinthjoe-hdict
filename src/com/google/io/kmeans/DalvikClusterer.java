@@ -9,8 +9,7 @@ import java.util.Random;
  */
 public class DalvikClusterer implements Clusterer {
 	private static final int MAX_LOOP_COUNT = 15;
-	private final HashMap<Point, Double> distances = new HashMap<Point, Double>(
-			KMeansThread.POINT_COUNT);
+	private final double[] distances = new double[KMeansThread.POINT_COUNT];
 	private final Random random = new Random(System.currentTimeMillis());
 
 	public void cluster(Point[] points, int numClusters, int width, int height) {
@@ -19,6 +18,7 @@ public class DalvikClusterer implements Clusterer {
 		double distance;
 		double curMinDistance;
 		int loopCount = 0;
+		Point point;
 		
 		// randomly pick some points to be the centroids of the groups, for the first pass
 		Point[] means = new Point[numClusters];
@@ -28,9 +28,8 @@ public class DalvikClusterer implements Clusterer {
 		}
 
 		// initialize data
-		distances.clear();
-		for (Point point : points) {
-			distances.put(point, Double.MAX_VALUE);
+		for (int i = 0; i < points.length; ++i) {
+			distances[i] = Double.MAX_VALUE;
 		}
 		int[] sumX = new int[numClusters];
 		int[] sumY = new int[numClusters];
@@ -40,12 +39,14 @@ public class DalvikClusterer implements Clusterer {
 		while (!converged) {
 			dirty = false;
 			// compute which group each point is closest to
-			for (Point point : points) {
-				curMinDistance = distances.get(point);
+			for (int i = 0; i < points.length; ++i) {
+				point = points[i];
+				curMinDistance = distances[i];
 				for (Point mean : means) {
 					distance = computeDistance(point, mean);
 					if (distance < curMinDistance) {
 						dirty = true;
+						distances[i] = distance;
 						curMinDistance = distance;
 						point.cluster = mean.cluster;
 					}
@@ -60,7 +61,8 @@ public class DalvikClusterer implements Clusterer {
 			for (int i = 0; i < numClusters; ++i) {
 				sumX[i] = sumY[i] = clusterSizes[i] = 0;
 			}
-			for (Point point : points) {
+			for (int i = 0; i < points.length; ++i) {
+				point = points[i];
 				sumX[point.cluster] += point.x;
 				sumY[point.cluster] += point.y;
 				clusterSizes[point.cluster] += 1;
