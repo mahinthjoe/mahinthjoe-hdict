@@ -2,6 +2,7 @@ package com.google.io.kmeans;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.SurfaceHolder.Callback;
@@ -13,14 +14,35 @@ import android.view.SurfaceHolder.Callback;
 public class KMeansView extends SurfaceView implements Callback {
 	private KMeansThread thread;
 
+	/**
+	 * Constructor called when instantiated via declarative XML layout.
+	 * @param context the Android application context
+	 * @param attrs the XML attributes specified in the XML declaration
+	 */
 	public KMeansView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 
 		SurfaceHolder holder = getHolder();
 		holder.addCallback(this);
-		// use either the Dalvik version, or the native version; don't uncomment both
+		// this ctor means the view is instantiated via XML; use DalvikClusterer as default
 		thread = new KMeansThread(holder, new DalvikClusterer());
-		//thread = new KMeansThread(holder, new NativeClusterer());
+	}
+	
+	/**
+	 * Constructor that allows specification of the Clusterer to use.
+	 * @param context the Android application context
+	 * @param clustererClass the Clusterer instance to use
+	 */
+	public KMeansView(Context context, Class<? extends Clusterer> clustererClass) {
+		super(context);
+		SurfaceHolder holder = getHolder();
+		holder.addCallback(this);
+		try {
+			thread = new KMeansThread(holder, (Clusterer) clustererClass.newInstance());
+		} catch (Exception e) {
+			Log.w("KMeansView constructor", "failed to instantiate Clusterer; falling back on Dalvik default");
+			thread = new KMeansThread(holder, new DalvikClusterer());
+		}
 	}
 
 	public void surfaceChanged(SurfaceHolder holder, int format, int width,
@@ -34,6 +56,10 @@ public class KMeansView extends SurfaceView implements Callback {
 	}
 
 	public void surfaceDestroyed(SurfaceHolder arg0) {
+		killThread();
+	}
+	
+	public void killThread() {
 		thread.setRunning(false);
 		boolean done = false;
 		while (!done) {

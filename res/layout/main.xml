@@ -1,5 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.io.kmeans.KMeansView xmlns:android="http://schemas.android.com/apk/res/android"
-  android:id="@+id/surface"
+<RelativeLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
   android:layout_width="fill_parent"
-  android:layout_height="fill_parent"/>
+  android:layout_height="fill_parent">
+  <TextView
+  	android:id="@+id/hello"
+    android:layout_centerHorizontal="true"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Hello!"/>
+  <TextView
+  	android:id="@+id/explication"
+    android:layout_centerHorizontal="true"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@id/hello"
+    android:text="@string/explication"
+    android:gravity="center"/>
+  <Button
+  	android:id="@+id/pure_dalvik_button"
+    android:layout_centerHorizontal="true"
+    android:layout_below="@id/explication"
+    android:layout_marginTop="20dip"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Use Pure Dalvik Clusterer"/>
+  <Button
+  	android:id="@+id/native_button"
+    android:layout_centerHorizontal="true"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@id/pure_dalvik_button"
+    android:text="Use Native Clusterer"/>
+  <Button
+  	android:id="@+id/browser_button"
+    android:layout_centerHorizontal="true"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@id/native_button"
+    android:text="Launch Browser Version"/>
+  <Button
+  	android:id="@+id/webview_button"
+    android:layout_centerHorizontal="true"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@id/browser_button"
+    android:text="Launch WebView Version"/>
+</RelativeLayout>

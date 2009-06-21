@@ -2,4 +2,5 @@
 <resources>
     <string name="hello">Hello World, KMeansActivity</string>
     <string name="app_name">K-Means Visualizer</string>
+<string name="explication">So you want to benchmark Android, eh? Touch a button below, and then check logcat. If you are testing on a device, I highly recommend turning on Airplane Mode, at least for the non-web versions.</string>
 </resources>
