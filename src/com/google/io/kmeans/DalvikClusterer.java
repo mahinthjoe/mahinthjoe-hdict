@@ -18,8 +18,9 @@ public class DalvikClusterer implements Clusterer {
 		double curMinDistance;
 		int loopCount = 0;
 		Point point;
-		
-		// randomly pick some points to be the centroids of the groups, for the first pass
+
+		// randomly pick some points to be the centroids of the groups, for the
+		// first pass
 		Point[] means = new Point[numClusters];
 		for (int i = 0; i < numClusters; ++i) {
 			means[i] = new Point(random.nextInt(width), random.nextInt(height));
@@ -33,6 +34,8 @@ public class DalvikClusterer implements Clusterer {
 		int[] sumX = new int[numClusters];
 		int[] sumY = new int[numClusters];
 		int[] clusterSizes = new int[numClusters];
+
+		double tmpX, tmpY;
 
 		// main loop
 		while (!converged) {
@@ -56,7 +59,8 @@ public class DalvikClusterer implements Clusterer {
 				converged = true;
 				break;
 			}
-			// compute the new centroids of the groups, since contents have changed
+			// compute the new centroids of the groups, since contents have
+			// changed
 			for (int i = 0; i < numClusters; ++i) {
 				sumX[i] = sumY[i] = clusterSizes[i] = 0;
 			}
@@ -67,8 +71,17 @@ public class DalvikClusterer implements Clusterer {
 				clusterSizes[point.cluster] += 1;
 			}
 			for (int i = 0; i < numClusters; ++i) {
-				means[i].x = (int)(sumX[i] / clusterSizes[i]);
-				means[i].y = (int)(sumY[i] / clusterSizes[i]);
+				try {
+					tmpX = sumX[i] / clusterSizes[i];
+					tmpY = sumY[i] / clusterSizes[i];
+					means[i].x = (int) tmpX;
+					means[i].y = (int) tmpY;
+				} catch (ArithmeticException e) {
+					// means a Divide-By-Zero error, b/c no points were associated with this cluster.
+					// rare, so reset the cluster to have a new random center
+					means[i].x = random.nextInt(width);
+					means[i].y = random.nextInt(height);
+				}
 			}
 
 			// bail out after at most MAX_LOOP_COUNT passes
@@ -81,7 +94,6 @@ public class DalvikClusterer implements Clusterer {
 	 * Computes the Cartesian distance between two points.
 	 */
 	private double computeDistance(Point a, Point b) {
-		return Math.sqrt((a.x - b.x) * (a.x - b.x)
-				+ (a.y - b.y) * (a.y - b.y));
+		return Math.sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
 	}
 }

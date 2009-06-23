@@ -5,6 +5,7 @@ import java.util.Random;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.os.Debug;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
@@ -19,12 +20,14 @@ public final class KMeansThread extends Thread {
 	public static final int[] COLORS = new int[] { Color.RED,
 			Color.argb(255, 255, 69, 0), Color.YELLOW, Color.GREEN, Color.BLUE,
 			Color.argb(255, 255, 0, 255) };
+	
+	private static final int NUM_SAMPLES = 20;
 
 	Point[] points;
 	private SurfaceHolder holder;
 	private boolean sizeSet = false;
 	private boolean running = false;
-	private long clusterDuration;
+	private long clusterAverage;
 	private Clusterer clusterer;
 	private Random random = new Random(System.currentTimeMillis());
 	private int width;
@@ -33,6 +36,9 @@ public final class KMeansThread extends Thread {
 	@Override
 	public void run() {
 		long start;
+		double[] samples = new double[NUM_SAMPLES];
+		int sampleIdx = 0;
+		double curSample;
 		while (running) {
 			while (!sizeSet) {
 				try {
@@ -42,9 +48,12 @@ public final class KMeansThread extends Thread {
 			}
 			// randomly pick a new set of points for each pass, then do the work
 			prepare();
-			start = System.currentTimeMillis();
+			start = Debug.threadCpuTimeNanos();
 			clusterer.cluster(points, COLORS.length, width, height);
-			clusterDuration = System.currentTimeMillis() - start;
+			curSample = (Debug.threadCpuTimeNanos() - start) / (float)NUM_SAMPLES;
+			clusterAverage = clusterAverage + (long)(curSample - samples[sampleIdx]);
+			samples[sampleIdx] = curSample;
+			sampleIdx = (sampleIdx + 1) % NUM_SAMPLES;
 			draw(points);
 		}
 	}
@@ -66,8 +75,8 @@ public final class KMeansThread extends Thread {
 			}
 			long duration = System.currentTimeMillis() - start;
 			canvas.drawText("" + duration, 10, 10, paint);
-			canvas.drawText("" + clusterDuration, 10, 50, paint);
-			Log.d("Cluster time", "" + clusterDuration);
+			canvas.drawText("" + clusterAverage, 10, 50, paint);
+			Log.d("Running average over last " + NUM_SAMPLES + " samples", "" + clusterAverage);
 		} finally {
 			holder.unlockCanvasAndPost(canvas);
 		}

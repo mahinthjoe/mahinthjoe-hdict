@@ -35,6 +35,7 @@ jobjectArray points, jint numClusters, jint width, jint height) {
     jfieldID xFID, yFID, clusterFID;
     jint ptX = 0, ptY = 0;
     int i, j;
+    double tmpX, tmpY;
 
     // cache some JNI objects so we don't keep requerying them
     pointClass = (*env)->FindClass(env, "com/google/io/kmeans/Clusterer$Point");
@@ -92,8 +93,13 @@ jobjectArray points, jint numClusters, jint width, jint height) {
             clusterSizes[cluster] += 1;
         }
         for (i = 0; i < numClusters; ++i) {
-            means[i].x = sumX[i] / clusterSizes[i];
-            means[i].y = sumY[i] / clusterSizes[i];
+            if (clusterSizes[i] != 0) { // prevent divide by zero
+                means[i].x = sumX[i] / clusterSizes[i];
+                means[i].y = sumY[i] / clusterSizes[i];
+            } else { // if cluster had no contents, choose a new random mean
+              means[i].x = rand() % width;
+              means[i].y = rand() % height;
+            }
         }
         loopCount++;
         converged = converged ? 1 : loopCount > MAX_LOOP_COUNT;
