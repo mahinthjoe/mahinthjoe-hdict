@@ -51,8 +51,13 @@ function cluster() {
             clusterSizes[points.cluster] = clusterSizes[points.cluster] + 1;
         }
         for (var i = 0; i < means.length; i = i + 1) {
-            means[i].x = sumX[i] / clusterSizes[i];
-            means[i].y = sumY[i] / clusterSizes[i];
+            if (clusterSizes != 0) {
+                means[i].x = sumX[i] / clusterSizes[i];
+                means[i].y = sumY[i] / clusterSizes[i];
+            } else {
+                means.x = Math.floor(Math.random() * 320);
+                means.y = Math.floor(Math.random() * 480);
+            }
         }
         loopCount = loopCount + 1;
         if (loopCount > MAX_LOOP_COUNT) {

@@ -76,7 +76,7 @@ public final class KMeansThread extends Thread {
 			long duration = System.currentTimeMillis() - start;
 			canvas.drawText("" + duration, 10, 10, paint);
 			canvas.drawText("" + clusterAverage, 10, 50, paint);
-			Log.d("Running average over last " + NUM_SAMPLES + " samples", "" + clusterAverage);
+			Log.d("Running average over last " + NUM_SAMPLES + " samples", "" + clusterAverage / 1e6);
 		} finally {
 			holder.unlockCanvasAndPost(canvas);
 		}
